@@ -1,0 +1,15 @@
+{
+  "originHash" : "30fd47ed4afd1ff3e2ba6ccfa4fdf0eeb4a037c2cdeebac6db2057e82eb97190",
+  "pins" : [
+    {
+      "identity" : "shapes",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:nutterfi/Shapes.git",
+      "state" : {
+        "revision" : "7422720f332ce8b2ec7a7cc0633d998064faca15",
+        "version" : "0.7.0"
+      }
+    }
+  ],
+  "version" : 3
+}
