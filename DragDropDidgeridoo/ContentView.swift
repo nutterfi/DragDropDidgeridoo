@@ -6,31 +6,12 @@
 //
 
 import SwiftUI
-import UniformTypeIdentifiers
-
-
-struct Card: Hashable, Sendable {
-  var value: String
-}
-
-extension UTType {
-    static var card = UTType(exportedAs: "com.nutterfi.card")
-}
-
-extension Card: Transferable {
-  static var transferRepresentation: some TransferRepresentation {
-    ProxyRepresentation { card in
-      card.value
-    } importing: { value in
-      Card(value: value)
-    }
-  }
-}
+import Shapes
 
 @Observable
 class DataModel {
-  var upperCards: [Card] = ["A", "B", "C", "D"].map {Card(value: $0)}
-  var lowerCards: [Card] = ["W", "X", "Y", "Z"].map {Card(value: $0)}
+  var upperCards: [Card] = Card.upper
+  var lowerCards: [Card] = Card.lower
   
   func handleUpperDestinationDroppedItems(_ items: [Card]) {
     print("Dropped Item Upper: \(items)")
@@ -55,36 +36,46 @@ class DataModel {
   }
 }
 
+
 struct ContentView: View {
   @Environment(DataModel.self) private var dataModel
+  let columns = Array(repeating: GridItem(), count: 3)
   
     var body: some View {
       VStack {
         ScrollView {
-          ForEach(dataModel.upperCards.indices, id: \.self) { index in
-            Color.red.frame(height: 80)
-              .overlay {
-                Text(dataModel.upperCards[index].value)
-                  .font(.largeTitle.weight(.semibold))
-                  .foregroundStyle(.white)
-              }
-              .draggable(dataModel.upperCards[index])
+          LazyVGrid(columns: columns, spacing: 5) {
+            ForEach(dataModel.upperCards.indices, id: \.self) { index in
+              CardView(card: dataModel.upperCards[index])
+                .containerRelativeFrame(.horizontal) { length, _ in
+                  length / Double(columns.count) - 5
+                }
+                .draggable(dataModel.upperCards[index])
+            }
           }
+        }
+        .contentMargins(10)
+        .background {
+          Color.red
         }
         .dropDestination(for: Card.self) { items, offset in
           dataModel.handleUpperDestinationDroppedItems(items)
         }
         
         ScrollView {
-          ForEach(dataModel.lowerCards.indices, id: \.self) { index in
-            Color.yellow.frame(height: 80)
-              .overlay {
-                Text(dataModel.lowerCards[index].value)
-                  .font(.largeTitle.weight(.semibold))
-                  .foregroundStyle(.white)
-              }
-              .draggable(dataModel.lowerCards[index])
+          LazyVGrid(columns: columns, spacing: 5) {
+            ForEach(dataModel.lowerCards.indices, id: \.self) { index in
+              CardView(card: dataModel.lowerCards[index])
+                .containerRelativeFrame(.horizontal) { length, _ in
+                  length / Double(columns.count) - 5
+                }
+                .draggable(dataModel.lowerCards[index])
+            }
           }
+        }
+        .contentMargins(10)
+        .background {
+          Color.yellow
         }
         .dropDestination(for: Card.self) { items, offset in
           dataModel.handleLowerDestinationDroppedItems(items)
