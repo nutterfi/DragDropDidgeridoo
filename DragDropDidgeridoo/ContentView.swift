@@ -6,30 +6,50 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
+
+
+struct Card: Hashable, Sendable {
+  var value: String
+}
+
+extension UTType {
+    static var card = UTType(exportedAs: "com.nutterfi.card")
+}
+
+extension Card: Transferable {
+  static var transferRepresentation: some TransferRepresentation {
+    ProxyRepresentation { card in
+      card.value
+    } importing: { value in
+      Card(value: value)
+    }
+  }
+}
 
 @Observable
 class DataModel {
-  var upperStrings: [String] = ["A", "B", "C", "D"]
-  var lowerStrings: [String] = ["W", "X", "Y", "Z"]
+  var upperCards: [Card] = ["A", "B", "C", "D"].map {Card(value: $0)}
+  var lowerCards: [Card] = ["W", "X", "Y", "Z"].map {Card(value: $0)}
   
-  func handleUpperDestinationDroppedItems(_ items: [String]) {
+  func handleUpperDestinationDroppedItems(_ items: [Card]) {
     print("Dropped Item Upper: \(items)")
     items.forEach { item in
-      if !upperStrings.contains(item) {
-        upperStrings.append(item)
+      if !upperCards.contains(item) {
+        upperCards.append(item)
         // assume it came from lower
-        lowerStrings.removeAll(where: { $0 == item} )
+        lowerCards.removeAll(where: { $0 == item} )
       }
     }
   }
   
-  func handleLowerDestinationDroppedItems(_ items: [String]) {
+  func handleLowerDestinationDroppedItems(_ items: [Card]) {
     print("Dropped Item Lower: \(items)")
     items.forEach { item in
-      if !lowerStrings.contains(item) {
-        lowerStrings.append(item)
+      if !lowerCards.contains(item) {
+        lowerCards.append(item)
         // assume it came from upper
-        upperStrings.removeAll(where: { $0 == item} )
+        upperCards.removeAll(where: { $0 == item} )
       }
     }
   }
@@ -41,32 +61,32 @@ struct ContentView: View {
     var body: some View {
       VStack {
         ScrollView {
-          ForEach(dataModel.upperStrings.indices, id: \.self) { index in
+          ForEach(dataModel.upperCards.indices, id: \.self) { index in
             Color.red.frame(height: 80)
               .overlay {
-                Text(dataModel.upperStrings[index])
+                Text(dataModel.upperCards[index].value)
                   .font(.largeTitle.weight(.semibold))
                   .foregroundStyle(.white)
               }
-              .draggable(dataModel.upperStrings[index])
+              .draggable(dataModel.upperCards[index])
           }
         }
-        .dropDestination(for: String.self) { items, offset in
+        .dropDestination(for: Card.self) { items, offset in
           dataModel.handleUpperDestinationDroppedItems(items)
         }
         
         ScrollView {
-          ForEach(dataModel.lowerStrings.indices, id: \.self) { index in
-            Color.blue.frame(height: 80)
+          ForEach(dataModel.lowerCards.indices, id: \.self) { index in
+            Color.yellow.frame(height: 80)
               .overlay {
-                Text(dataModel.lowerStrings[index])
+                Text(dataModel.lowerCards[index].value)
                   .font(.largeTitle.weight(.semibold))
                   .foregroundStyle(.white)
               }
-              .draggable(dataModel.lowerStrings[index])
+              .draggable(dataModel.lowerCards[index])
           }
         }
-        .dropDestination(for: String.self) { items, offset in
+        .dropDestination(for: Card.self) { items, offset in
           dataModel.handleLowerDestinationDroppedItems(items)
         }
       }
@@ -75,6 +95,7 @@ struct ContentView: View {
 }
 
 #Preview {
+  @Previewable @State var dataModel = DataModel()
     ContentView()
-    .environment(DataModel())
+    .environment(dataModel)
 }
