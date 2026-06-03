@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct DragDropDidgeridooApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+  @State private var dataModel = DataModel()
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+        .environment(dataModel)
     }
+  }
 }
